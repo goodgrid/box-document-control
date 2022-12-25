@@ -7,15 +7,16 @@ const main = async () => {
 	// Because dates are converted to ISO8601 strings which is in UTC, they need correction with an timezone offset
 	const date = new Date()
 	const offSet = date.getTimezoneOffset()
-	const firstDayUTC = new Date(date.getFullYear(), date.getMonth() + (config.notifyNumberOfMonthsAhead), 1, 0, date.getHours() + (offSet * -1),0);
-	const lastDayUTC = new Date(date.getFullYear(), date.getMonth() + (config.notifyNumberOfMonthsAhead + 1), 0, 0, date.getHours() + (offSet * -1), 0);
+	const firstDayUTC = new Date(date.getFullYear()-1, date.getMonth() + Number(config.notifyNumberOfMonthsAhead), 1, 0, date.getHours() + (offSet * -1),0);
+	const lastDayUTC = new Date(date.getFullYear()-1, date.getMonth() + (Number(config.notifyNumberOfMonthsAhead) + 1), 0, 0, date.getHours() + (offSet * -1), 0);
+
 
 	const mdfilters = JSON.stringify([
 		{
-			"scope":"enterprise_844815493",
+			"scope": `enterprise_${config.jwt.enterpriseID}`,
 			"templateKey":"documentControl",
 			"filters":{
-				"expirationDate": {
+				"approvalDate": {
 					"gt": `${firstDayUTC.toISOString()}`,
 					"lt": `${lastDayUTC.toISOString()}`,
 				}
@@ -27,7 +28,7 @@ const main = async () => {
 		mdfilters: mdfilters
 	}})
 
-	console.log(`Searching Box for documents expiring between ${getReadableDate(firstDayUTC)} and ${getReadableDate(lastDayUTC)}`)
+	console.log(`Searching Box for documents approved between ${getReadableDate(firstDayUTC)} and ${getReadableDate(lastDayUTC)}`)
 
 	const result = await Promise.all(response.data.entries.map(async doc => {
 
@@ -36,7 +37,7 @@ const main = async () => {
 		const mdInstance = boxResponse.data.entries.find(entry => entry.$template == 'documentControl')
 		
 		const oktaResponse = await oktaApi.get('users',{params: {
-			search: `profile.NIDRole eq \"${mdInstance.ownership}\"`
+			search: `profile.${config.oktaRolePropertyName} eq \"${mdInstance.ownership}\"`
 		}})
 
 

@@ -4,7 +4,7 @@ import axios from 'axios'
 import config from './config.js'
 
 // A place to save the access token after it was minted
-let access_token = "initial-dummy"
+//let access_token = "initial-dummy"
 
 // Just setting the baseUrl for an Axios instance using for using the API.
 // Talking to the Token Service is done via the generic Axios instance,
@@ -30,7 +30,7 @@ const mintToken = () => {
             exp: Math.floor(Date.now() / 1000) + 60
         },
         { // The Key
-            key: Buffer.from(config.jwt.boxAppSettings.appAuth.privateKey, 'base64').toString('utf-8'),
+            key: config.jwt.boxAppSettings.appAuth.privateKey,
             passphrase: config.jwt.boxAppSettings.appAuth.passphrase
         }, 
         { // The Header
@@ -59,6 +59,7 @@ const mintToken = () => {
 // We are adding the Authorization header via request interceptor, so we are sure
 // any updated access token is read from the variable.
 boxApi.interceptors.request.use(request => {
+    if (config.debug) console.log(`Adding header to request`, request.headers.common)
     request.headers.common.Authorization = `Bearer ${global.access_token}`;
     return request;
   }, function (error) {
@@ -72,6 +73,7 @@ boxApi.interceptors.request.use(request => {
 // used from that moment on.
 boxApi.interceptors.response.use(null, (error) => {
     if (error.config && error.response && error.response.status === 401) {
+        if (config.debug) console.log(`Response statud was 401. Starting minting to generate token and add it to header`)
         return mintToken().then((token) => {
             global.access_token = token
             error.config.headers.Authorization = `Bearer ${token}` //<= set the token
