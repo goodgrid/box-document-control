@@ -1,5 +1,5 @@
 #!/bin/sh -e
-echo "Setting cron expression for Okta reporting to $runningCron"
+echo "Setting cron expression to $runningCron"
 
 # The cron expression and commnad
 echo "$runningCron /usr/local/bin/node /usr/src/app/document-control.js" >> /etc/crontabs/node

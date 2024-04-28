@@ -1,0 +1,30 @@
+{
+	"COO": {
+		"login": "machiel.van.ginderen@notarisid.nl",
+		"accountable": true
+	},
+    "Operations Manager": {
+        "login": "rutger.van.tol@notarisid.nl"
+    },
+	"Security Officer": {
+		"login": "niels.schoumans@notarisid.nl"
+	},
+	"Legal Counsel": {
+		"login": "lennert.ouwerkerk@notarisid.nl"
+	},
+	"CEO": {
+		"login": "evert.nooter@notarisid.nl"
+	},
+	"Business Continuity Manager": {
+		"login": "dick.van.bladel@notarisid.nl"
+	},
+	"Architect": {
+		"login": "aniek.hannink@notarisid.nl"
+	},
+	"CFO": {
+		"login": "dimitri.hellemons@notarisid.nl"
+	},
+	"HR Manager": {
+		"login": "wiebe.woudstra@notarisid.nl"
+	}
+}

@@ -1,6 +1,4 @@
-FROM node:16-alpine3.15
-
-
+FROM node:20-alpine3.18
 
 RUN apk update && apk add tzdata &&\
     cp /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime &&\

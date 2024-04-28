@@ -4,7 +4,7 @@ import axios from 'axios'
 import config from './config.js'
 
 // A place to save the access token after it was minted
-//let access_token = "initial-dummy"
+let access_token = "dummy"
 
 // Just setting the baseUrl for an Axios instance using for using the API.
 // Talking to the Token Service is done via the generic Axios instance,
@@ -16,9 +16,9 @@ const boxApi = axios.create({
 
 // This Mint Token function is creating a signed JWT and exchanging it for an 
 // access token at Box. The function is only called by the response interceptor,
-// so the first request after starting the Legacy Link Conversion service is
+// so the first request after starting the script  is
 // always initially getting a 401 and triggers the minting a token.
-const mintToken = () => {
+const mintToken = async () => {
     if (config.debug) console.log("Minting new token")
     const assertion = jwt.sign(
         { // The Claims
@@ -36,22 +36,21 @@ const mintToken = () => {
         { // The Header
             'algorithm': 'RS512',
             'keyid': config.jwt.boxAppSettings.appAuth.publicKeyID
-        })
+        }
+    )
 
-    return axios.post(config.boxTokenUrl, {
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: assertion,
-        client_id: config.jwt.boxAppSettings.clientID,
-        client_secret: config.jwt.boxAppSettings.clientSecret
-    })
-    .then(response => {
-        if (config.debug) console.log("Received access token", response.data.access_token)
-        return response.data.access_token
-    })
-    .catch(error => {
+    try {
+        const response = await axios.post(config.boxTokenUrl, {
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            assertion: assertion,
+            client_id: config.jwt.boxAppSettings.clientID,
+            client_secret: config.jwt.boxAppSettings.clientSecret
+        })
+        access_token = response.data.access_token
+    } catch(error) {
         console.log("Error in minting chain")
         if (config.debug) console.log(error)
-    })
+    }
 }
 
 
@@ -59,11 +58,10 @@ const mintToken = () => {
 // We are adding the Authorization header via request interceptor, so we are sure
 // any updated access token is read from the variable.
 boxApi.interceptors.request.use(request => {
-    if (config.debug) console.log(`Adding header to request`, request.headers.common)
-    request.headers.common.Authorization = `Bearer ${global.access_token}`;
+    request.headers.Authorization = `Bearer ${access_token}`;
     return request;
   }, function (error) {
-    return Promise.reject(error);
+    console.log(error)
   });
 
 
@@ -71,14 +69,14 @@ boxApi.interceptors.request.use(request => {
 // response is 401 (Unauthorized), then we are calling the Mint Token function
 // to generate a new JWT and exchange is for an access token, which is then
 // used from that moment on.
-boxApi.interceptors.response.use(null, (error) => {
+boxApi.interceptors.response.use(null, async (error) => {
     if (error.config && error.response && error.response.status === 401) {
         if (config.debug) console.log(`Response statud was 401. Starting minting to generate token and add it to header`)
-        return mintToken().then((token) => {
-            global.access_token = token
-            error.config.headers.Authorization = `Bearer ${token}` //<= set the token
-            return boxApi.request(error.config);
-        });
+        await mintToken()
+            
+        //error.config.headers.Authorization = `Bearer ${token}` //<= set the token
+        return boxApi.request(error.config);
+        
     }
     return Promise.reject(error);
 });

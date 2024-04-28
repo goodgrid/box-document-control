@@ -1,7 +1,7 @@
 {
 	"AWSEBDockerrunVersion": "1",
 	"Image": {
-		"Name": "goodgrid/box-document-control:0.9",
+		"Name": "goodgrid/box-document-control:1.0",
 		"Update": "true"
 	},
 	"Ports": [

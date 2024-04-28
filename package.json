@@ -1,11 +1,12 @@
 {
   "name": "box-document-control",
-  "version": "0.1",
+  "version": "1.0",
   "description": "",
-  "main": "start.js",
+  "main": "document-control.js",
   "type": "module",
   "dependencies": {
-    "axios": "^0.27.2",
-    "jsonwebtoken": "^8.5.1"
+    "axios": "latest",
+    "date-fns": "latest",
+    "jsonwebtoken": "latest"
   }
 }
