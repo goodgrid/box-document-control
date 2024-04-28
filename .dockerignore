@@ -2,3 +2,5 @@ dev-variables.txt
 /node_modules/
 .DS_Store
 package-lock.json
+role-definition-sample.json
+aws-beanstalk-app-bundle.json
