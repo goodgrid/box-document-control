@@ -45,6 +45,7 @@ const main = async () => {
 		}
 
 		if (config.debug) console.log(expiringDocument)
+		createAndAssignTask(expiringDocument)
 	})
 }
 
