@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import jwt from 'jsonwebtoken'
+import { SignJWT } from 'jose'
 import axios from 'axios'
 import config from './config.js'
 
@@ -14,13 +14,27 @@ const boxApi = axios.create({
 })
 
 
+// The passphrase protected private key is decrypted once and then reused for
+// every assertion. It is done lazily so a bad key or passphrase surfaces while
+// minting instead of at import time.
+let privateKey
+const getPrivateKey = () => {
+    if (!privateKey) {
+        privateKey = crypto.createPrivateKey({
+            key: config.jwt.boxAppSettings.appAuth.privateKey,
+            passphrase: config.jwt.boxAppSettings.appAuth.passphrase
+        })
+    }
+    return privateKey
+}
+
 // This Mint Token function is creating a signed JWT and exchanging it for an 
 // access token at Box. The function is only called by the response interceptor,
 // so the first request after starting the script  is
 // always initially getting a 401 and triggers the minting a token.
 const mintToken = async () => {
     if (config.debug) console.log("Minting new token")
-    const assertion = jwt.sign(
+    const assertion = await new SignJWT(
         { // The Claims
             iss: config.jwt.boxAppSettings.clientID,
             sub: config.jwt.enterpriseID,
@@ -28,16 +42,14 @@ const mintToken = async () => {
             aud: config.boxTokenUrl,
             jti: crypto.randomBytes(64).toString("hex"),
             exp: Math.floor(Date.now() / 1000) + 60
-        },
-        { // The Key
-            key: config.jwt.boxAppSettings.appAuth.privateKey,
-            passphrase: config.jwt.boxAppSettings.appAuth.passphrase
-        }, 
-        { // The Header
-            'algorithm': 'RS512',
-            'keyid': config.jwt.boxAppSettings.appAuth.publicKeyID
-        }
-    )
+        })
+        .setProtectedHeader({ // The Header
+            alg: 'RS512',
+            typ: 'JWT',
+            kid: config.jwt.boxAppSettings.appAuth.publicKeyID
+        })
+        .setIssuedAt()
+        .sign(getPrivateKey())
 
     try {
         const response = await axios.post(config.boxTokenUrl, {
@@ -71,7 +83,7 @@ boxApi.interceptors.request.use(request => {
 // used from that moment on.
 boxApi.interceptors.response.use(null, async (error) => {
     if (error.config && error.response && error.response.status === 401) {
-        if (config.debug) console.log(`Response statud was 401. Starting minting to generate token and add it to header`)
+        if (config.debug) console.log(`Response status was 401. Starting minting to generate token and add it to header`)
         await mintToken()
             
         //error.config.headers.Authorization = `Bearer ${token}` //<= set the token

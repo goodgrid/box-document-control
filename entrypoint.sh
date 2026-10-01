@@ -2,7 +2,7 @@
 echo "Setting cron expression to $runningCron"
 
 # The cron expression and commnad
-echo "$runningCron /usr/local/bin/node /usr/src/app/document-control.js" >> /etc/crontabs/node
+echo "$runningCron /usr/local/bin/node /usr/src/app/document-control.js" > /etc/crontabs/node
 
 # Whiteline to make it a valid crontab
 echo "" >> /etc/crontabs/node

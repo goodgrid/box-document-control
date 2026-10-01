@@ -5,8 +5,8 @@
   "main": "document-control.js",
   "type": "module",
   "dependencies": {
-    "axios": "latest",
-    "date-fns": "latest",
-    "jsonwebtoken": "latest"
+    "axios": "^1.20.0",
+    "date-fns": "^4.4.0",
+    "jose": "^6.2.12"
   }
 }
