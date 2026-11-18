@@ -1,4 +1,4 @@
-FROM node:24-alpine3.24
+FROM node:26-alpine3.24
 
 # The container runs the job from cron, so the image timezone determines when
 # the schedule in $runningCron actually fires. Keep tzdata installed: removing

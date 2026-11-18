@@ -1,12 +1,12 @@
 {
   "name": "box-document-control",
-  "version": "1.0",
+  "version": "1.0.3",
   "description": "",
   "main": "document-control.js",
   "type": "module",
   "dependencies": {
-    "axios": "^1.20.0",
+    "axios": "^1.21.1",
     "date-fns": "^4.4.0",
-    "jose": "^6.2.12"
+    "jose": "^6.2.17"
   }
 }
